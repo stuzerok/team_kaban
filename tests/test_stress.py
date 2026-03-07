@@ -1,6 +1,6 @@
 import random
 from riscv_reg_block import reg_access
-from gold_model import gold_access
+from gold_model import gold_access, uart_golden
 import time
 
 def test_stress_1000():
@@ -10,12 +10,12 @@ def test_stress_1000():
 
     print(f"Rand seed={seed}") #3360095148
 
-    for i in range(10000):
-        addr = rng.randint(0, 4)          
+    for i in range(1000000):
+        addr = rng.randint(0, 17)          
         operation = rng.choice(['read', 'write', 'error'])   
 
         if operation == 'write':
-            data = rng.randint(0, 0x0000FFFF)      
+            data = rng.randint(0, 0xFFFFFFFF)      
         else:
             data = 0                                
 
@@ -39,5 +39,6 @@ def test_stress_1000():
                 )
                 print(msg)
                 errors.append(msg)
-
+    uart_golden.write_toggle_report("toggle_report.txt")
+    uart_golden.write_toggle_arrays("toggle_arrays.txt")
     assert not errors, f"Rand seed={seed}"
