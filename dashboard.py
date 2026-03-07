@@ -9,6 +9,7 @@ import networkx as nx
 import random
 
 
+
 # ============================================
 # ФУНКЦИЯ ДЛЯ ОТРИСОВКИ МАТРИЦЫ ПОКРЫТИЯ 10×32
 # ============================================
@@ -63,9 +64,249 @@ def draw_coverage_matrix(matrix_data):
 
     return fig
 
+# ============================================
+# ФУНКЦИЯ 1: ПРИМЕРЫ БАГОВ ДЛЯ ДЕМО
+# ============================================
+def get_example_bugs():
+    """
+    Возвращает примеры багов для демонстрации, когда файл не найден
+    """
+    return [
+        {
+            'id': 'BUG-001',
+            'title': 'Stale data at 0x0042',
+            'full_text': 'Баг №1: При записи в регистр 0x0042 первые 3 чтения возвращают старые данные. Проявляется только после записи нового значения.',
+            'lines': [
+                'Баг №1: При записи в регистр 0x0042 первые 3 чтения возвращают старые данные.',
+                'Проявляется только после записи нового значения.'
+            ]
+        },
+        {
+            'id': 'BUG-002',
+            'title': 'Bus deadlock',
+            'full_text': 'Баг №2: Зависает шина при последовательности write(0x0013) → read(0x0077).',
+            'lines': [
+                'Баг №2: Зависает шина при последовательности write(0x0013) → read(0x0077).'
+            ]
+        },
+        {
+            'id': 'BUG-003',
+            'title': '64-bit overflow',
+            'full_text': 'Баг №3: 64-битный доступ к адресам >=0x8000 обрезается до 32 бит.',
+            'lines': [
+                'Баг №3: 64-битный доступ к адресам >=0x8000 обрезается до 32 бит.'
+            ]
+        }
+    ]
+
 
 # ============================================
-# ФУНКЦИЯ ДЛЯ ЧТЕНИЯ МАТРИЦЫ ИЗ ФАЙЛА КАПИТАНА
+# ФУНКЦИЯ 2: ЧТЕНИЕ БАГОВ ИЗ ФАЙЛА
+# ============================================
+def load_bugs_from_text():
+    """
+    Читает файл bugs_description.txt и разбивает на отдельные баги.
+    Баги разделяются пустыми строками.
+    """
+    file_path = 'bugs_description.txt'
+    bugs = []
+
+    try:
+        # Проверяем существует ли файл
+        if not os.path.exists(file_path):
+            st.warning(f"⚠️ Файл {file_path} не найден. Показываю примеры.")
+            return get_example_bugs()
+
+        # Читаем содержимое файла
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Исправляем переносы для Windows
+        content = content.replace('\r\n', '\n').replace('\r', '\n')
+
+        # Разделяем по пустым строкам (два и больше переносов)
+        import re
+        bug_texts = re.split(r'\n\s*\n', content)
+
+        # Обрабатываем каждый найденный блок
+        for i, text in enumerate(bug_texts, 1):
+            text = text.strip()
+            if text:  # если блок не пустой
+                # Разбиваем на строки
+                lines = text.split('\n')
+                # Первая строка - заголовок
+                title = lines[0][:50] + '...' if len(lines[0]) > 50 else lines[0]
+
+                # Создаем словарь с информацией о баге
+                bug = {
+                    'id': f'BUG-{i:03d}',  # BUG-001, BUG-002 и т.д.
+                    'title': title,
+                    'full_text': text,
+                    'lines': [line.strip() for line in lines if line.strip()]
+                }
+                bugs.append(bug)
+
+        if bugs:
+            st.success(f"✅ Загружено {len(bugs)} описаний багов")
+            return bugs
+        else:
+            return get_example_bugs()
+
+    except Exception as e:
+        st.error(f"❌ Ошибка при чтении файла: {e}")
+        return get_example_bugs()
+
+    # ============================================
+    # ФУНКЦИЯ 3: ОТРИСОВКА КАРТОЧЕК БАГОВ
+    # ============================================
+    def draw_bug_card(bug, index):
+        """
+        Рисует красивую карточку для одного бага
+        """
+        # Цвета для разных багов
+        colors = ['#1e3a5f', '#2e4a7f', '#3e5a9f', '#4e6abf']
+        color = colors[index % len(colors)]
+
+        # Формируем HTML для карточки
+        card_html = f"""
+        <div style='
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 8px solid {color};
+        '>
+            <div style='display: flex; justify-content: space-between; align-items: center;'>
+                <h3 style='margin:0; color: {color};'>
+                    🔍 {bug['id']}
+                </h3>
+                <span style='
+                    background: {color};
+                    color: white;
+                    padding: 3px 10px;
+                    border-radius: 20px;
+                    font-size: 0.8em;
+                '>ACTIVE</span>
+            </div>
+
+            <div style='margin: 10px 0;'>
+        """
+
+        # Добавляем каждую строку текста
+        for line in bug['lines']:
+            if line.strip():
+                card_html += f"<p style='margin:5px 0; line-height:1.5;'>{line}</p>"
+
+        card_html += f"""
+            </div>
+
+            <div style='
+                background: #f8f9fa;
+                padding: 10px;
+                border-radius: 10px;
+                margin-top: 10px;
+                font-family: monospace;
+                font-size: 0.9em;
+            '>
+                📋 Полный текст: {bug['full_text'][:100]}...
+            </div>
+
+            <div style='margin-top: 15px; display: flex; gap: 10px;'>
+                <span style='
+                    background: {color}20;
+                    color: {color};
+                    padding: 3px 10px;
+                    border-radius: 15px;
+                    font-size: 0.8em;
+                    font-weight: bold;
+                '>🐞 Баг #{index + 1}</span>
+
+                <span style='
+                    background: #e9ecef;
+                    color: #495057;
+                    padding: 3px 10px;
+                    border-radius: 15px;
+                    font-size: 0.8em;
+                '>📅 {datetime.now().strftime('%d.%m.%Y')}</span>
+            </div>
+        </div>
+        """
+
+        return card_html
+
+
+# ============================================
+# ФУНКЦИЯ 4: ОТРИСОВКА КАРТОЧЕК БАГОВ
+# ============================================
+def draw_bug_card(bug, index):
+    """
+    Рисует красивую карточку для одного бага
+    """
+    # Цвета для разных багов
+    colors = ['#1e3a5f', '#2e4a7f', '#3e5a9f', '#4e6abf']
+    color = colors[index % len(colors)]
+
+    # Формируем HTML для карточки
+    card_html = f"""
+    <div style='
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-left: 8px solid {color};
+    '>
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <h3 style='margin:0; color: {color};'>
+                🔍 {bug['id']}
+            </h3>
+            <span style='
+                background: {color};
+                color: white;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 0.8em;
+            '>ACTIVE</span>
+        </div>
+
+        <div style='margin: 10px 0;'>
+    """
+
+    # Добавляем каждую строку текста
+    for line in bug['lines']:
+        if line.strip():
+            card_html += f"<p style='margin:5px 0; line-height:1.5;'>{line}</p>"
+
+    card_html += f"""
+        </div>
+
+        <div style='margin-top: 15px; display: flex; gap: 10px;'>
+            <span style='
+                background: {color}20;
+                color: {color};
+                padding: 3px 10px;
+                border-radius: 15px;
+                font-size: 0.8em;
+                font-weight: bold;
+            '>🐞 Баг #{index + 1}</span>
+
+            <span style='
+                background: #e9ecef;
+                color: #495057;
+                padding: 3px 10px;
+                border-radius: 15px;
+                font-size: 0.8em;
+            '>📅 {datetime.now().strftime('%d.%m.%Y')}</span>
+        </div>
+    </div>
+    """
+
+    return card_html
+
+
+# ============================================
+# ФУНКЦИЯ ДЛЯ ЧТЕНИЯ МАТРИЦЫ ИЗ ФАЙЛА
 # ============================================
 def get_captain_matrix():
     """
@@ -324,12 +565,13 @@ with col4:
 # ============================================
 # ВКЛАДКИ (ДОБАВЛЯЕМ ПЯТУЮ - Coverage Matrix)
 # ============================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📊 Coverage Metrics",
     "🔥 Register Heatmap",
     "🔄 FSM Graph",
     "⏱️ Transaction Timeline",
-    "🔲 Coverage Matrix"  # НОВАЯ ВКЛАДКА
+    "🔲 Coverage Matrix",
+    "🐞 Bug Reports"  # НОВАЯ ВКЛАДКА
 ])
 
 with tab1:
@@ -358,6 +600,7 @@ with tab5:
 
     # ЗАГРУЖАЕМ МАТРИЦУ ИЗ ФАЙЛА КАПИТАНА
     captain_matrix = get_captain_matrix()
+
 
     if captain_matrix is None:
         st.info("ℹ️ Использую демо-данные для примера.")
@@ -398,6 +641,73 @@ with tab5:
                     col_cov = sum(row[j] for row in captain_matrix) / 10 * 100
                     st.write(f"Bit {j}: {col_cov:.0f}%")
 
+with tab6:
+    st.subheader("🐞 Bug Reports")
+    st.caption("Описания найденных багов (из файла bugs_description.txt)")
+
+    # Инструкция по формату
+    with st.expander("📋 Как добавлять новые баги", expanded=False):
+        st.markdown("""
+        1. Открой файл `bugs_description.txt` в корневой папке проекта
+        2. Добавь описание нового бага
+        3. Оставь **пустую строку** между разными багами
+        4. Сохрани файл (Ctrl+S)
+        5. Нажми кнопку обновления ниже
+
+        **Пример формата:** (используется в текущем файле)
+
+        ⚠️ **ВАЖНО:** Между багами обязательно должна быть пустая строка!
+        """)
+
+    # Загружаем баги из файла
+    bugs = load_bugs_from_text()
+
+    # Статистика
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("Всего багов", len(bugs))
+
+    with col2:
+        file_exists = os.path.exists('bugs_description.txt')
+        st.metric("Файл", "✅ Есть" if file_exists else "❌ Нет")
+
+    with col3:
+        st.metric("Статус", f"🔄 {len(bugs)} активных" if bugs else "📭 Нет багов")
+
+    st.divider()
+
+    # Отображаем баги
+    if bugs:
+        st.markdown("### 📋 Список найденных багов")
+
+        for i, bug in enumerate(bugs):
+            st.markdown(draw_bug_card(bug, i), unsafe_allow_html=True)
+
+            if i < len(bugs) - 1:
+                st.markdown("---")
+    else:
+        st.info("ℹ️ Нет описаний багов. Добавьте их в файл `bugs_description.txt`")
+
+    # Кнопки управления
+    col_btn1, col_btn2 = st.columns(2)
+
+    with col_btn1:
+        if st.button("🔄 Обновить список багов", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+
+    with col_btn2:
+        if st.button("📝 Показать содержимое файла", use_container_width=True):
+            if os.path.exists('bugs_description.txt'):
+                try:
+                    with open('bugs_description.txt', 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    st.code(content, language='text')
+                except Exception as e:
+                    st.error(f"❌ Ошибка чтения файла: {e}")
+            else:
+                st.warning("⚠️ Файл не найден")
 # ============================================
 # ИНСТРУКЦИЯ ДЛЯ КОМАНДЫ
 # ============================================
