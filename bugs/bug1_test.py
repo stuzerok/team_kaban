@@ -1,21 +1,48 @@
 from riscv_reg_block import reg_access
+from gold_model import gold_access
 import pytest
-import random
 
-@pytest.mark.bug
-def test_stale_data_hunt():
-    """Охота на stale data"""
-    suspicious_addrs = list(range(0x0000, 0x1000))
-    random.shuffle(suspicious_addrs)
+
+def test_data_lock():
     
-    stale_found = 0
-    for addr in suspicious_addrs[:100]:
-        reg_access(addr, 0x1234, 'write')
-        r1 = reg_access(addr, 0, 'read')
-        reg_access(addr, 0x5678, 'write')
-        r2 = reg_access(addr, 0, 'read')
-        if r1['reg_value'] == r2['reg_value']:
-            print(f"STALE DATA addr=0x{addr:04x}")
-            stale_found += 1
-    
-    print(f"Найдено stale data: {stale_found}")
+    errors = 0
+
+    addr = 3 
+    data = 0x1010
+    operation = 'write'
+    errors += data_sent(addr, data, operation)
+
+    addr = 4
+    data = 0x00 
+    operation = 'read'
+    errors += data_sent(addr, data, operation)
+
+    assert not errors
+
+def data_sent(addr, data, operation):
+    errors = 0
+    result = reg_access(addr, data, operation)
+    result_ref = gold_access(addr, data, operation)
+    errors = check_val (addr, data, result, result_ref, operation)
+    return errors
+
+def check_val(addr, data, result, result_ref, operation):
+    errors = 0
+    if result['ack'] != result_ref['ack']:
+        msg = (
+            f"ACK mismatch: "
+            f"addr=0x{addr:04X}, op={operation}, data=0x{data:08X}, "
+            f"dut={result['ack']}, ref={result_ref['ack']}"
+        )
+        print(msg)
+        errors = errors + 1
+    if operation == 'read':
+        if result['reg_value'] != result_ref['reg_value']:
+            msg = (
+                f"REG_VALUE mismatch: "
+                f"addr=0x{addr:04X}, op={operation}, "
+                f"dut=0x{result['reg_value']:X}, ref=0x{result_ref['reg_value']:X}"
+            )
+            print(msg)
+            errors = errors + 1
+    return errors

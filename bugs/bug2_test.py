@@ -2,7 +2,6 @@ from riscv_reg_block import reg_access
 import pytest
 import random
 
-@pytest.mark.bug
 def test_deadlock_hunt():
     """Охота на bus deadlock"""
     suspicious_addrs = list(range(0x0000, 0x1000))
