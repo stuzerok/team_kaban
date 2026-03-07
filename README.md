@@ -1,4 +1,3 @@
-cat > README.md << 'EOF'
 # Team Alpha | RISC-V Register Verifier
 
 ## Метрики YADRO (цель: 950/1000 → стажировка)
