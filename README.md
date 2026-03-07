@@ -1,5 +1,5 @@
-# Team Alpha | RISC-V Register Verifier
-
+# Team Kaban | RISC-V Register Verifier
+[Схема](env.jpg)
 ## Метрики YADRO (цель: 950/1000 → стажировка)
 
 | Метрика | Цель | Текущий | Команда |
