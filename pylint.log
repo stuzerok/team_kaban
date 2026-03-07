@@ -1,0 +1,13 @@
+************* Module gold_model
+gold_model.py:106:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+gold_model.py:108:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+gold_model.py:109:47: C0303: Trailing whitespace (trailing-whitespace)
+gold_model.py:110:17: C0303: Trailing whitespace (trailing-whitespace)
+gold_model.py:200:0: C0304: Final newline missing (missing-final-newline)
+************* Module tests.test_stress
+tests\test_stress.py:51:0: C0304: Final newline missing (missing-final-newline)
+tests\test_stress.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+
+------------------------------------------------------------------
+Your code has been rated at 9.50/10 (previous run: 0.00/10, +9.50)
+

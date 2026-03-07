@@ -48,3 +48,4 @@ def test_stress_1000():
     uart_golden.write_toggle_report("toggle_report.txt")
 
     assert not errors, f"Rand seed={seed}"
+    

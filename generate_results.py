@@ -130,7 +130,7 @@ def get_pylint_score():
     try:
         # Запускаем pylint для всех python файлов
         result = subprocess.run(
-            ['pylint', '*.py', 'tests/', '--score=yes'],
+            ['pylint', 'gold_model.py', 'tests/test_stress.py', '--score=yes'],
             capture_output=True,
             text=True,
             timeout=30

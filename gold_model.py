@@ -9,9 +9,12 @@ class GoldModel:
 
     BASE_ADDR = 0x4000_0000
     REG_SIZE = 4
-    NUM_REGS = 16
+    NUM_REGS = 10
     DATA_MASK = 0xFFFFFFFF
-    BYTE_MASK = 0x000000FF
+    BYTE_MASK_0 = 0x000000FF
+    BYTE_MASK_4 = 0x0000000F
+    BYTE_MASK_6 = 0x000000C7
+    BYTE_MASK_8 = 0x0000000F
 
     REGS = {
         "RBR_THR": 0x4000_0000,
@@ -54,7 +57,13 @@ class GoldModel:
     def _normalize_write_data(self, addr: int, data: int) -> int:
         """Apply register-specific write masking rules."""
         if addr == 0:
-            return data & self.BYTE_MASK
+            return data & self.BYTE_MASK_0
+        if addr == 4:
+            return data & self.BYTE_MASK_4
+        if addr == 6:
+            return data & self.BYTE_MASK_6
+        if addr == 8:
+            return data & self.BYTE_MASK_8
         return data & self.DATA_MASK
 
     def _update_toggle(self, addr: int, new_value: int) -> None:
@@ -88,8 +97,20 @@ class GoldModel:
 
         if op == "write":
             new_value = self._normalize_write_data(addr, data)
-            self.reg[addr] = new_value
-            self._update_toggle(addr, new_value)
+            if addr == 5:
+                self.reg[addr] = self.reg[addr]
+            elif addr == 7:
+                self.reg[addr] = self.reg[addr]
+            elif addr == 9:
+                self.reg[addr] = self.reg[addr]
+            elif addr == 1 and not (self.reg[3] * 0x80 >> 8):
+                self.reg[addr] = self.reg[addr]
+            elif addr == 2 and not (self.reg[3] * 0x80 >> 8):
+                self.reg[addr] = self.reg[addr]   
+            else:         
+                self.reg[addr] = new_value
+
+            self._update_toggle(addr, data)
             return {"ack": True, "reg_value": new_value}
 
         if op == "read":
