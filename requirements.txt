@@ -1,0 +1,8 @@
+cat > requirements.txt << 'EOF'
+riscv-reg-block
+pytest-cov
+streamlit
+plotly
+networkx
+pylint
+EOF

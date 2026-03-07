@@ -1,0 +1,7 @@
+Your code has been rated at 7.5/10 (starter template)
+
+No errors found, but there are some warnings:
+- C0116: Missing module docstring (test_basic.py:1)
+- C0301: Line too long (dashboard.py:45)
+
+Target: 8.5+/10 for YADRO review
