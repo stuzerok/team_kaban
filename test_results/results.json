@@ -1,8 +1,19 @@
 {
-    "coverage": 25,
-    "bugs_found": 0,
-    "pylint_score": 7.5,
-    "last_update": "2026-03-07 20:30",
-    "tests_passed": 156,
-    "tests_total": 200
+  "coverage": 80,
+  "bugs_found": 6,
+  "pylint_score": 7.76,
+  "last_update": "2026-03-07 16:14:29",
+  "tests_passed": 22,
+  "tests_total": 6,
+  "register_stats": {
+    "0x0042": 156,
+    "0x0013": 89,
+    "0x0077": 45,
+    "0x1000": 23,
+    "0x1004": 67,
+    "0x1008": 34,
+    "0x100C": 12,
+    "0x8000": 5,
+    "0x8004": 3
+  }
 }

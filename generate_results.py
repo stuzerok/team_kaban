@@ -46,37 +46,71 @@ def print_error(message):
 # ============================================
 def get_coverage():
     """
+       Запускает pytest и получает процент покрытия
+       """
+    # 👇 ДОБАВЬ ЭТИ ДВЕ СТРОКИ В САМОЕ НАЧАЛО ФУНКЦИИ
+    global print_info
+    print_info = lambda msg: print(f"ℹ️ {msg}")
+
+    print_step("Запускаю pytest для измерения покрытия...")
+    # ... остальной код функции ...
+    """
     Запускает pytest и получает процент покрытия
-    Возвращает: число (процент покрытия)
+    Упрощенная версия БЕЗ pkg_resources
     """
     print_step("Запускаю pytest для измерения покрытия...")
 
     try:
         # Запускаем pytest с coverage
         result = subprocess.run(
-            ['pytest', 'tests/', '--cov', '--cov-report=', '-q'],
+            ['pytest', 'tests/', '--cov', '--cov-report=', '-v'],
             capture_output=True,
-            text=True,
-            timeout=30
+            text=True
         )
 
-        # Ищем строку типа "TOTAL 123 45 78%"
-        # Вывод pytest выглядит примерно так:
-        # tests/test_basic.py ..                                   [ 20%]
-        # tests/test_bugs.py ....                                  [ 40%]
-        # TOTAL 150 30 80%
+        # Показываем результаты тестов
+        print(f"\n📊 Результаты тестов:")
+        output_lines = result.stdout.split('\n')
 
-        match = re.search(r'TOTAL\s+\d+\s+\d+\s+(\d+)%', result.stdout)
-        if match:
-            coverage = int(match.group(1))
+        passed = 0
+        failed = 0
+
+        for line in output_lines:
+            if 'PASSED' in line or '.' in line and 'test_' in line:
+                passed += 1
+                print(f"  ✅ {line.strip()}")
+            elif 'FAILED' in line or 'F' in line and 'test_' in line:
+                failed += 1
+                print(f"  ❌ {line.strip()}")
+
+        print(f"\n   ✅ Прошло: {passed}")
+        print(f"   ❌ Упало: {failed}")
+        print(f"   📝 Всего: {passed + failed}")
+
+        # Ищем покрытие в выводе
+        import re
+        coverage_match = re.search(r'TOTAL\s+\d+\s+\d+\s+(\d+)%', result.stdout)
+        if coverage_match:
+            coverage = int(coverage_match.group(1))
             print_success(f"Покрытие: {coverage}%")
             return coverage
         else:
-            print_warning("Не удалось найти процент покрытия в выводе pytest")
-            print("Вывод pytest:", result.stdout[:200])  # Показываем начало вывода
+            # Проверяем, установлен ли pytest-cov
+            if 'pytest-cov' not in result.stderr and 'coverage' not in result.stdout:
+                print_warning("pytest-cov не установлен. Покрытие не измерено.")
+                print_info("Установите: pip install pytest-cov")
+
+            # Спрашиваем у пользователя
+            manual = input("Введите процент покрытия вручную (или Enter для 0): ").strip()
+            if manual:
+                try:
+                    return int(manual)
+                except:
+                    pass
             return 0
-    except subprocess.TimeoutExpired:
-        print_error("Pytest выполняется слишком долго (больше 30 секунд)")
+
+    except FileNotFoundError:
+        print_error("pytest не найден! Установите: pip install pytest")
         return 0
     except Exception as e:
         print_error(f"Ошибка при запуске pytest: {e}")
@@ -205,21 +239,42 @@ def get_register_stats():
 def ask_bugs_found():
     """
     Спрашивает у пользователя сколько багов найдено
+    БЕЗ ОГРАНИЧЕНИЙ - можно ввести ЛЮБОЕ число!
     """
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("🐞 СКОЛЬКО БАГОВ НАШЛИ?")
-    print("=" * 50)
+    print("=" * 60)
+    print("💡 Можно ввести ЛЮБОЕ число (0, 1, 2, 3, 5, 10...)")
+    print("   Если нашли больше 3 - это круто! 🎉")
+    print("   (введите число и нажмите Enter)\n")
 
     while True:
         try:
-            bugs = input("Введите количество найденных багов (0-3): ").strip()
-            bugs = int(bugs)
-            if 0 <= bugs <= 3:
+            bugs_input = input("🐞 Багов найдено: ").strip()
+
+            # Проверка на пустой ввод
+            if bugs_input == "":
+                print("⚠️ Введите число или 0 если не знаете")
+                continue
+
+            bugs = int(bugs_input)
+
+            # Только проверка что число не отрицательное
+            if bugs >= 0:
+                if bugs > 3:
+                    print(f"🎉 УРА! Нашли {bugs} багов - больше чем в спецификации!")
+                    print(f"✅ Принято: {bugs} баг(ов)")
+                else:
+                    print(f"✅ Принято: {bugs} баг(ов)")
                 return bugs
             else:
-                print_warning("Введите число от 0 до 3")
+                print("❌ Число не может быть отрицательным!")
+
         except ValueError:
-            print_error("Введите число!")
+            print("❌ Это не число! Введите целое число (0, 1, 2, 3, ...)")
+        except KeyboardInterrupt:
+            print("\n\n⚠️ Прервано. Устанавливаю 0.")
+            return 0
 
 
 # ============================================
