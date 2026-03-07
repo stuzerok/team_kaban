@@ -156,88 +156,9 @@ def load_bugs_from_text():
         st.error(f"❌ Ошибка при чтении файла: {e}")
         return get_example_bugs()
 
-    # ============================================
-    # ФУНКЦИЯ 3: ОТРИСОВКА КАРТОЧЕК БАГОВ
-    # ============================================
-    def draw_bug_card(bug, index):
-        """
-        Рисует красивую карточку для одного бага
-        """
-        # Цвета для разных багов
-        colors = ['#1e3a5f', '#2e4a7f', '#3e5a9f', '#4e6abf']
-        color = colors[index % len(colors)]
-
-        # Формируем HTML для карточки
-        card_html = f"""
-        <div style='
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-left: 8px solid {color};
-        '>
-            <div style='display: flex; justify-content: space-between; align-items: center;'>
-                <h3 style='margin:0; color: {color};'>
-                    🔍 {bug['id']}
-                </h3>
-                <span style='
-                    background: {color};
-                    color: white;
-                    padding: 3px 10px;
-                    border-radius: 20px;
-                    font-size: 0.8em;
-                '>ACTIVE</span>
-            </div>
-
-            <div style='margin: 10px 0;'>
-        """
-
-        # Добавляем каждую строку текста
-        for line in bug['lines']:
-            if line.strip():
-                card_html += f"<p style='margin:5px 0; line-height:1.5;'>{line}</p>"
-
-        card_html += f"""
-            </div>
-
-            <div style='
-                background: #f8f9fa;
-                padding: 10px;
-                border-radius: 10px;
-                margin-top: 10px;
-                font-family: monospace;
-                font-size: 0.9em;
-            '>
-                📋 Полный текст: {bug['full_text'][:100]}...
-            </div>
-
-            <div style='margin-top: 15px; display: flex; gap: 10px;'>
-                <span style='
-                    background: {color}20;
-                    color: {color};
-                    padding: 3px 10px;
-                    border-radius: 15px;
-                    font-size: 0.8em;
-                    font-weight: bold;
-                '>🐞 Баг #{index + 1}</span>
-
-                <span style='
-                    background: #e9ecef;
-                    color: #495057;
-                    padding: 3px 10px;
-                    border-radius: 15px;
-                    font-size: 0.8em;
-                '>📅 {datetime.now().strftime('%d.%m.%Y')}</span>
-            </div>
-        </div>
-        """
-
-        return card_html
-
 
 # ============================================
-# ФУНКЦИЯ 4: ОТРИСОВКА КАРТОЧЕК БАГОВ
+# ФУНКЦИЯ 3: ОТРИСОВКА КАРТОЧЕК БАГОВ (УПРОЩЕННАЯ)
 # ============================================
 def draw_bug_card(bug, index):
     """
@@ -247,57 +168,46 @@ def draw_bug_card(bug, index):
     colors = ['#1e3a5f', '#2e4a7f', '#3e5a9f', '#4e6abf']
     color = colors[index % len(colors)]
 
-    # Формируем HTML для карточки
+    # Формируем HTML для карточки - УПРОЩЕННАЯ ВЕРСИЯ
     card_html = f"""
-    <div style='
+    <div style="
         background: white;
-        border-radius: 15px;
-        padding: 20px;
-        margin: 15px 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-left: 8px solid {color};
-    '>
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h3 style='margin:0; color: {color};'>
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 6px solid {color};
+        font-family: Arial, sans-serif;
+    ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin:0; color: {color}; font-size: 18px;">
                 🔍 {bug['id']}
             </h3>
-            <span style='
+            <span style="
                 background: {color};
                 color: white;
-                padding: 3px 10px;
-                border-radius: 20px;
-                font-size: 0.8em;
-            '>ACTIVE</span>
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            ">АКТИВЕН</span>
         </div>
-
-        <div style='margin: 10px 0;'>
     """
 
-    # Добавляем каждую строку текста
+    # Добавляем текст бага
     for line in bug['lines']:
         if line.strip():
-            card_html += f"<p style='margin:5px 0; line-height:1.5;'>{line}</p>"
+            card_html += f"<p style='margin:5px 0; font-size:14px;'>{line}</p>"
 
     card_html += f"""
-        </div>
-
-        <div style='margin-top: 15px; display: flex; gap: 10px;'>
-            <span style='
-                background: {color}20;
+        <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <span style="
+                background: {color}15;
                 color: {color};
-                padding: 3px 10px;
-                border-radius: 15px;
-                font-size: 0.8em;
-                font-weight: bold;
-            '>🐞 Баг #{index + 1}</span>
-
-            <span style='
-                background: #e9ecef;
-                color: #495057;
-                padding: 3px 10px;
-                border-radius: 15px;
-                font-size: 0.8em;
-            '>📅 {datetime.now().strftime('%d.%m.%Y')}</span>
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+            ">🐞 Баг #{index + 1}</span>
         </div>
     </div>
     """
@@ -306,7 +216,7 @@ def draw_bug_card(bug, index):
 
 
 # ============================================
-# ФУНКЦИЯ ДЛЯ ЧТЕНИЯ МАТРИЦЫ ИЗ ФАЙЛА
+# ФУНКЦИЯ ДЛЯ ЧТЕНИЯ МАТРИЦЫ ИЗ ФАЙЛА КАПИТАНА
 # ============================================
 def get_captain_matrix():
     """
@@ -347,12 +257,15 @@ def get_captain_matrix():
         return None
 
 
-# Функция для расчета процента покрытия
+# ============================================
+# ФУНКЦИЯ ДЛЯ РАСЧЕТА ПРОЦЕНТА ПОКРЫТИЯ
+# ============================================
 def calculate_coverage_percentage(matrix):
     """Считает процент единиц в матрице"""
     total = len(matrix) * len(matrix[0])
     covered = sum(sum(row) for row in matrix)
     return (covered / total) * 100
+
 
 # ============================================
 # НАСТРОЙКА СТРАНИЦЫ
@@ -362,8 +275,6 @@ st.set_page_config(
     page_icon="🔬",
     layout="wide"
 )
-
-
 # ============================================
 # ФУНКЦИЯ ЗАГРУЗКИ ДАННЫХ
 # ============================================
@@ -677,12 +588,11 @@ with tab6:
 
     st.divider()
 
-    # Отображаем баги
     if bugs:
         st.markdown("### 📋 Список найденных багов")
 
         for i, bug in enumerate(bugs):
-            st.markdown(draw_bug_card(bug, i), unsafe_allow_html=True)
+            st.markdown(draw_bug_card(bug, i), unsafe_allow_html=True)  # ← ИСПРАВЛЕНО!
 
             if i < len(bugs) - 1:
                 st.markdown("---")
