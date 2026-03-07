@@ -25,11 +25,11 @@ class GoldModel:
 
     def __init__(self) -> None:
         """Initialize internal register storage."""
-        self.reg = array("I", [0] * 17)
+        self.reg = array("I", [0] * 16)
 
     def reset(self) -> None:
         """Reset all modeled registers to zero."""
-        self.reg = array("I", [0] * 17)
+        self.reg = array("I", [0] * 16)
 
     def gold_access(self, addr: int, data: int, operation: str) -> Dict[str, Any]:
         """Perform reference read or write transaction.
