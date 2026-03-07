@@ -8,10 +8,10 @@ def test_stress_1000():
     seed = int(time.time_ns() % (2**32))
     rng = random.Random(seed)
 
-    print(f"Rand seed={seed}")
+    print(f"Rand seed={seed}") #3360095148
 
     for i in range(10000):
-        addr = rng.randint(0, 2)          
+        addr = rng.randint(0, 4)          
         operation = rng.choice(['read', 'write', 'error'])   
 
         if operation == 'write':

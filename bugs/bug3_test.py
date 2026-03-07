@@ -3,16 +3,16 @@ from gold_model import gold_access
 import pytest
 import random
 
-def test_data_cut():
+def test_data_lag():
     
     errors = 0
 
-    addr = 5 
-    data = 0xFFFFFFFF
+    addr = 2
+    data = 0x0000FF42
     operation = 'write'
     errors += data_sent(addr, data, operation)
 
-    addr = 5
+    addr = 2
     data = 0x00 
     operation = 'read'
     errors += data_sent(addr, data, operation)
