@@ -1,4 +1,3 @@
-cat > tests/test_basic.py << 'EOF'
 from riscv_reg_block import reg_access
 import pytest
 
@@ -11,4 +10,3 @@ def test_write_read():
     reg_access(0x0001, 0xDEADBEEF, 'write')
     result = reg_access(0x0001, 0, 'read')
     assert result['status'] == 'OK'
-EOF
